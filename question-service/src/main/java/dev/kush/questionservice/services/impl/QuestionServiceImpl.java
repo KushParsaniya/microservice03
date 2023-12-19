@@ -2,12 +2,14 @@ package dev.kush.questionservice.services.impl;
 
 import dev.kush.questionservice.exceptions.ResourceNotFoundException;
 import dev.kush.questionservice.models.Question;
+import dev.kush.questionservice.models.QuestionWrapper;
 import dev.kush.questionservice.models.UserAnswer;
 import dev.kush.questionservice.repository.QuestionRepository;
 import dev.kush.questionservice.services.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -40,8 +42,10 @@ public class QuestionServiceImpl implements QuestionService {
 
 
     @Override
-    public Question getQuestion(Long questionId) {
-        return getById(questionId);
+    public QuestionWrapper getQuestion(Long questionId) {
+        Question question = getById(questionId);
+        return new QuestionWrapper(question.getQuestionId(), question.getQuestion(),
+                question.getOption1(), question.getOption2(), question.getOption3(), question.getOption4());
     }
 
     @Override
@@ -66,25 +70,18 @@ public class QuestionServiceImpl implements QuestionService {
         if (userAnswer == null || userAnswer.isEmpty()) {
             return 0L;
         }
-
-        List<Question> questions = userAnswer.
+        // we have to sort it so declare like this so it is mutable
+        List<Question> questions = new java.util.ArrayList<>(userAnswer.
                 stream().map(UserAnswer::questionId)
-                .map(this::getById).toList();
+                .map(this::getById).toList());
 
-         final long correctAnswer = IntStream.range(0, userAnswer.size())
-                .filter(index -> userAnswer.get(index).userAnswer().equals(questions.get(index).getAnswer()))
-                .count();
+        // sort both List by questionId
+        questions.sort(Comparator.comparingLong(Question::getQuestionId));
+        userAnswer.sort(Comparator.comparingLong(UserAnswer::questionId));
 
-//         Second method:
-//        int i = 0;
-//        int correct = 0;
-//        for (Question question : questions) {
-//            if (Objects.equals(question.getAnswer(), userAnswer.get(i).userAnswer())){
-//                correct++;
-//            }
-//            i++;
-//        }
-        return correctAnswer;
+        return IntStream.range(0, userAnswer.size())
+               .filter(index -> userAnswer.get(index).userAnswer().equals(questions.get(index).getAnswer()))
+               .count();
     }
 
     @Override

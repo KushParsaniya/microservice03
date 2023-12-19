@@ -1,6 +1,7 @@
 package dev.kush.questionservice.controller;
 
 import dev.kush.questionservice.models.Question;
+import dev.kush.questionservice.models.QuestionWrapper;
 import dev.kush.questionservice.models.UserAnswer;
 import dev.kush.questionservice.services.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class QuestionController {
     }
 
     @GetMapping("/{questionId}")
-    public Question getQuestion(@PathVariable Long questionId) {
+    public QuestionWrapper getQuestion(@PathVariable Long questionId) {
         return questionService.getQuestion(questionId);
     }
 
@@ -50,7 +51,7 @@ public class QuestionController {
         return questionService.calculateResult(userAnswers);
     }
 
-    @GetMapping("/random-question-id")
+    @GetMapping("/random-question-ids")
     public List<Long> getRandomQuestionIdsByType(
             @RequestParam String type,
             @RequestParam Integer numOfQuestions
