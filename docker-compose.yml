@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  naming-server: 
+    image: kushparsaniya/microservice03-naming-server:0.0.1-SNAPSHOT
+    port:
+      - "8761:8761"
+  
+  # postgres
+  postgres:
+    image: postgres:latest
+    port:
+      - "5432:5432"
+    enviroment:
+      POSTGRES_DB: microservice
+      POSGRES_USER: postgres
+      POSGRES_PASS: Kush1234
+
+  # question-service
+  question-service:
+    image: kushparsaniya/microservice03-question-service:0.0.1-SNAPSHOT
+    port:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - naming-server
+    enviroment:
+      SPRING.DATASOURCE.URL: jdbc:postgresql://postgres:8080/microservice
+      SPRING.DATASOURCE.USERNAME: your_username
+      SPRING.DATASOURCE.PASSWORD: your_password
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  # quiz-service
+  quiz-service:
+    image: kushparsaniya/microservice03-quiz-service:0.0.1-SNAPSHOT
+    port: 
+      - "8083:8083"
+    depends_on:
+      - postgres
+      - naming-server
+    environment:
+      SPRING.DATASOURCE.URL: jdbc:postgresql://postgres:8080/microservice
+      SPRING.DATASOURCE.USERNAME: your_username
+      SPRING.DATASOURCE.PASSWORD: your_password
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+    
+    # api-gateway
+  api-gateway:
+    image: kushparsaniya/microservice03-api-gateway:0.0.1-SNAPSHOT
+    port: 
+      - "8765:8765"
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+
+
+  
