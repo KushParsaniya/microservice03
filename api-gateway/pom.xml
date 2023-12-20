@@ -53,6 +53,12 @@
 	<build>
 		<plugins>
 			<plugin>
+				<configuration>
+					<image>
+						<name>kushparsaniya/microservice03-${project.artifactId}:${project.version}</name>
+					</image>
+					<pullPolicy>IF_NOT_PRESENT</pullPolicy>
+				</configuration>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
